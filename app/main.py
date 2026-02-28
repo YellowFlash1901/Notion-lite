@@ -1,15 +1,12 @@
 import uuid
-from fastapi import  FastAPI, status
+from fastapi import  FastAPI, status, Depends
 import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, create_engine
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from app.config import Settings
+from app.database import get_db
 
-settings = Settings()
-engine = create_engine(settings.DATABASE_URL)
-session = Session(engine)
 
 Base = declarative_base()
 
@@ -20,7 +17,7 @@ class Page(Base):
     title = Column(String)
     content = Column(String)
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()
@@ -37,10 +34,9 @@ class PageResponse(Pagebase):
     pass
 
 @app.post("/create-page", response_model=PageResponse, status_code=status.HTTP_201_CREATED)
-async def create_page(page: CreatePage):
+async def create_page(page: CreatePage, db: Session = Depends(get_db)):
     db_page = Page(**page.dict())
-    session.add(db_page)
-    session.commit()
-    session.refresh(db_page)
+    db.add(db_page)
+    db.commit()
     return db_page
 
