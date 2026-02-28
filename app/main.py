@@ -5,10 +5,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, create_engine
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from app.config import Settings
 
-
-DATABASE_URL = "postgresql://postgres:example@db:5432/postgres"
-engine = create_engine(DATABASE_URL)
+settings = Settings()
+engine = create_engine(settings.DATABASE_URL)
 session = Session(engine)
 
 Base = declarative_base()
